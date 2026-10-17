@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Sans:wght@400;500;600;700&family=Instrument+Sans:wght@400..700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "./studio.css";
+@import "./press.css";
+
+/* Enable class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-indigo-600: #c5654c;
+  --color-indigo-700: #aa513c;
+  --color-indigo-50: #fbefea;
+}
+
+@layer base {
+  html,
+  body {
+    @apply bg-gray-50/50 text-gray-900 font-sans antialiased;
+  }
+
+  .dark html,
+  .dark body,
+  html.dark,
+  body.dark {
+    background-color: rgb(3 7 18); /* gray-950 */
+    color: rgb(243 244 246); /* gray-100 */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+@layer components {
+  .card-bold {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-md;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 px-6 py-3;
+  }
+}
