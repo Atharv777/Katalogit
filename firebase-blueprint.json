@@ -1,0 +1,32 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Retail product catalog item",
+      "type": "object",
+      "properties": {
+        "sku": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "subcategory": { "type": "string" },
+        "description": { "type": "string" },
+        "attributes": { "type": "object" },
+        "price": { "type": "number" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["active", "draft"] },
+        "imageUrl": { "type": "string" },
+        "aiImageProduct": { "type": "string" },
+        "aiImageLifestyle": { "type": "string" },
+        "embedding": { "type": "array", "items": { "type": "number" } },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["sku", "title", "category", "subcategory", "description", "price", "status", "imageUrl", "createdAt"]
+    }
+  },
+  "firestore": {
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of all products in the catalog"
+    }
+  }
+}

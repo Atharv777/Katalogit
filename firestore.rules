@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny — covers every path not explicitly allowed below.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // One seller's catalogue. Nobody else can read or write it.
+    match /users/{uid}/products/{productId} {
+
+      allow list, get: if request.auth != null
+                       && request.auth.uid == uid;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.uid == uid
+                    && isValidProduct(request.resource.data);
+
+      // `createdAt` and `uid` are immutable — an update may not rewrite them.
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == uid;
+    }
+  }
+
+  // Products written by the new capture flow always carry the identity fields.
+  // Everything else (attributes, images, seo copy) is free-form but bounded.
+  function isValidProduct(data) {
+    return data.keys().hasAll([
+               'uid', 'sku', 'title', 'category',
+               'description', 'price', 'status', 'createdAt'
+             ])
+        && data.uid is string
+        && data.sku is string && data.sku.size() > 0 && data.sku.size() <= 100
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 500
+        && data.category is string && data.category.size() <= 100
+        && data.description is string && data.description.size() <= 4000
+        && data.price is number && data.price > 0 && data.price < 10000000
+        && data.status in ['active', 'draft', 'review']
+        && data.createdAt is number
+        && (data.get('subcategory', null) == null
+            || (data.subcategory is string && data.subcategory.size() <= 200))
+        && (data.get('seoDescription', null) == null
+            || (data.seoDescription is string && data.seoDescription.size() <= 1000))
+        && (data.get('imageUrl', '') is string && data.imageUrl.size() <= 1048576)
+        && (data.get('tags', []) is list && data.tags.size() <= 20)
+        && (data.get('attributes', {}) is map && data.attributes.size() <= 20)
+        && (data.get('images', []) is list && data.images.size() <= 12);
+  }
+}

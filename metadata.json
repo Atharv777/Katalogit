@@ -1,0 +1,8 @@
+{
+  "name": "CatalogAI",
+  "description": "A smart product cataloging tool for Indian retail stores using AI for automatic attribution and duplicate detection.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

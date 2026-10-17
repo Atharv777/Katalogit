@@ -1,0 +1,10 @@
+.git/
+.vercel/
+node_modules/
+dist/
+.env*
+.agents/
+scripts/
+LOCAL-PREVIEW.md
+skills-lock.json
+*.zip
