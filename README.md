@@ -13,42 +13,8 @@
 
   <h1 align="center">Katalogit AI</h1>
 
-  <p align="center">
-    From product photo to catalogue, social post, and storefront.
-    <br />
-    <a href="#getting-started"><strong>Get started locally »</strong></a>
-    <br /><br />
-    <a href="#usage">Explore the workflow</a>
-    &middot;
-    <a href="https://github.com/Atharv777/Katalogit/issues">Report a bug</a>
-    &middot;
-    <a href="https://github.com/Atharv777/Katalogit/issues">Request a feature</a>
-  </p>
 </div>
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li><a href="#about-the-project">About the Project</a>
-      <ul><li><a href="#built-with">Built With</a></li></ul>
-    </li>
-    <li><a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#ai-configuration">AI Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#development">Development</a></li>
-    <li><a href="#deployment">Deployment</a></li>
-    <li><a href="#project-status">Project Status</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
 
 ## About the Project
 
@@ -80,7 +46,7 @@ The current app opens a prototype studio without sign-in. Products and photos ar
 | Images and UI utilities | Sharp, Lucide React, QRCode |
 | Development checks | TypeScript, Vitest, fast-check, Playwright |
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top"> </a>)</p>
 
 
 ## Usage
@@ -99,11 +65,11 @@ The current app opens a prototype studio without sign-in. Products and photos ar
 | `/#/demo` | Studio with walkthrough; asks for a shop profile first |
 | `/mobile-upload?session=...` | Phone upload page for a generated session |
 
-For local phone uploads, both devices must be able to reach the development server over the network. Use the QR-generated address rather than the phone's `localhost`.
+For local phone uploads, both devices must be able to reach the development server over the network. Use the QR-generated address.
 
-Social content is downloaded or copied for manual sharing. The website builder exports an HTML file; publishing that file requires separate hosting.
+Social content is downloaded or copied for manual sharing. The website builder exports an HTML file;
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top"> </a>)</p>
 
 ## Development
 
@@ -140,7 +106,7 @@ Katalogit/
 ├── storage.rules           # Firebase Storage access rules
 └── vercel.json             # Build and routing configuration
 ```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top"> </a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Atharv777/Katalogit.svg?style=for-the-badge
 [contributors-url]: https://github.com/Atharv777/Katalogit/graphs/contributors
