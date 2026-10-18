@@ -52,9 +52,9 @@
 
 ## About the Project
 
-Katalogit is an AI-assisted product catalogue studio for sellers. Upload a product photo, draft a listing from what the AI sees, create product imagery, and manage the result in one workspace. The same catalogue can supply downloadable social posts, a CSV export, and a standalone HTML storefront.
+Katalogit is an AI-assisted product catalogue studio for sellers. Upload a product photo, draft a listing from what the AI sees, create product imagery, and manage the result in one workspace. The same catalogue can supply downloadable social posts, a CSV export, and a standalone storefront website.
 
-The current app opens a prototype studio without sign-in. Products and photos are stored in the browser using `localStorage` and data URLs. AI requests run through an Express API so provider credentials stay on the server.
+The current app opens a prototype studio without sign-in. Products and photos are stored using Firebase. AI requests run through an Express API so provider credentials stay on the server.
 
 ### Features
 
@@ -80,81 +80,8 @@ The current app opens a prototype studio without sign-in. Products and photos ar
 | Images and UI utilities | Sharp, Lucide React, QRCode |
 | Development checks | TypeScript, Vitest, fast-check, Playwright |
 
-See [package.json](package.json) for dependency versions and scripts.
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Getting Started
-
-### Prerequisites
-
-- Git.
-- Node.js 22.12 or newer, with npm, to satisfy the tooling dependencies.
-- A Gemini or OpenRouter API key for photo analysis and listing generation. Image generation also requires an available image provider and model access.
-
-You can explore the interface and bundled examples without AI credentials; photo analysis requires a configured provider.
-
-### Installation
-
-1. Clone the repository and enter its directory:
-
-   ```sh
-   git clone https://github.com/Atharv777/Katalogit.git
-   cd Katalogit
-   ```
-
-2. Install dependencies from the lockfile:
-
-   ```sh
-   npm ci
-   ```
-
-3. Copy the environment template:
-
-   ```sh
-   cp .env.example .env.local
-   ```
-
-   On Windows, copy `.env.example` to `.env.local` using your file manager or shell equivalent.
-
-4. Edit `.env.local` and add your provider credentials. For example:
-
-   ```dotenv
-   GEMINI_API_KEY=your_gemini_api_key
-   APP_URL=http://localhost:3000
-   ```
-
-   Check the model settings in the copied file against models available to your provider account. The repository's model names are configurable defaults, not a guarantee of access.
-
-5. Start the application:
-
-   ```sh
-   npm run dev
-   ```
-
-6. Open [http://localhost:3000](http://localhost:3000).
-
-### AI Configuration
-
-Credentials are loaded from the ignored `.env.local` file by the local server. Restart the server after changing them.
-
-| Variable | Purpose |
-| --- | --- |
-| `GEMINI_API_KEY` | Gemini photo analysis, listing/caption generation, and image editing; `GOOGLE_API_KEY` is also accepted |
-| `GEMINI_TEXT_MODEL`, `GEMINI_IMAGE_MODEL` | Override Gemini model IDs |
-| `OPENROUTER_API_KEY` | Alternative provider for text, vision, and image requests |
-| `OPENROUTER_TEXT_MODEL`, `OPENROUTER_IMAGE_MODEL` | Override OpenRouter model IDs |
-| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Enable Cloudflare Workers AI image editing |
-| `OPENAI_API_KEY` | Enable OpenAI image editing |
-| `OPENAI_IMAGE_MODEL`, `OPENAI_IMAGE_QUALITY` | Configure OpenAI image requests |
-| `APP_URL` | Application URL used in OpenRouter request metadata |
-| `PORT` | Local server port; defaults to `3000` |
-
-Photo analysis and social copy try Gemini and then OpenRouter when configured. Image generation tries configured providers in this order: Cloudflare, Gemini, OpenAI, and OpenRouter. Availability, credits, and model access affect whether a request succeeds.
-
-[http://localhost:3000/api/ai/status](http://localhost:3000/api/ai/status) reports provider configuration. It does not verify credits or successful generation. See [.env.example](.env.example) and [server/ai.ts](server/ai.ts) for the configuration details and implementation.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
@@ -213,60 +140,6 @@ Katalogit/
 ├── storage.rules           # Firebase Storage access rules
 └── vercel.json             # Build and routing configuration
 ```
-
-## Deployment
-
-The repository includes Vercel configuration: the frontend builds to `dist/`, `/api/*` requests route to the Express function in `api/index.ts`, and `/mobile-upload` serves the app entry point. Configure provider secrets in the hosting environment.
-
-For a Node-hosted build, install dependencies, build the frontend, and run the server in production mode:
-
-```sh
-npm run build
-NODE_ENV=production npm run dev
-```
-
-The environment assignment above uses Unix shell syntax. The server still uses `tsx`, so that dependency must be available at runtime.
-
-Phone upload sessions are stored in server memory. On Vercel, requests may reach different function instances, making phone handoff best-effort; persistent shared session storage is needed for reliable multi-instance deployment.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Project Status
-
-Katalogit currently exposes a local prototype workflow. Browser storage is device-specific, limited by browser quota, and cleared when site data is removed.
-
-Firebase authentication, Firestore product services, Storage helpers, and access rules exist in the repository. However, the active `App.tsx` supplies a prototype user and does not mount `AuthGate`. The `?auth=1` path mentioned in older preview notes is not wired into the current app. Enabling account-backed persistence requires connecting the authentication flow and configuring your own Firebase project.
-
-See the [open issues](https://github.com/Atharv777/Katalogit/issues) for reported problems and proposed improvements.
-
-## Contributing
-
-To propose a change, open an issue describing the problem or submit a focused pull request.
-
-1. Fork the repository.
-2. Create a branch: `git checkout -b feature/your-feature`.
-3. Make your changes and run `npm run lint`, `npm test`, and `npm run build`.
-4. Commit and push to your fork.
-5. Open a pull request describing the change and how you verified it.
-
-## License
-
-Several source files include `SPDX-License-Identifier: Apache-2.0` headers. This checkout does not contain a repository-level `LICENSE` file; confirm the intended project-wide license with the maintainer.
-
-## Contact
-
-Repository owner: [Atharv777](https://github.com/Atharv777)
-
-Project: [Katalogit](https://github.com/Atharv777/Katalogit)
-
-Questions and bug reports: [GitHub Issues](https://github.com/Atharv777/Katalogit/issues)
-
-## Acknowledgments
-
-- [Best-README-Template](https://github.com/othneildrew/Best-README-Template) for this README's structure.
-- [Shields.io](https://shields.io) for repository badges.
-- The maintainers of the libraries and tools listed in [Built With](#built-with).
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Atharv777/Katalogit.svg?style=for-the-badge
