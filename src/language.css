@@ -1,0 +1,8 @@
+.language-select{display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;padding:7px 9px;border:1px solid #dcded9;border-radius:8px;background:#fff;color:#343944;font:700 11px "DM Sans",sans-serif}
+.language-select select{min-width:75px;max-width:115px;border:0;background:transparent;color:inherit;font:700 11px "DM Sans",sans-serif;cursor:pointer;outline-offset:2px}
+.welcome-header{justify-content:space-between;gap:12px}.welcome-header .language-select{flex:none}
+.seller-assessment-header .language-select{margin-left:auto}
+.studio-sidebar .language-select{width:100%;margin:0 0 24px;background:#fff;color:#363943}
+.studio-sidebar .language-select select{flex:1;min-width:0}
+.mobile-language{position:absolute;top:20px;right:20px}
+@media(max-width:767px){.studio-sidebar .language-select{position:absolute;top:16px;right:57px;width:auto;max-width:125px;margin:0;padding:5px 6px}.studio-sidebar .language-select>span{display:none}.studio-sidebar .language-select select{width:68px;min-width:68px}.welcome-header .language-select>span,.seller-assessment-header .language-select>span{display:none}}

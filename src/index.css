@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "./studio.css";
 @import "./press.css";
+@import "./language.css";
 
 /* Enable class-based dark mode for Tailwind v4 */
 @variant dark (&:where(.dark, .dark *));

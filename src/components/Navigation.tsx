@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { User } from "firebase/auth";
 import Brand from "./Brand";
+import { LanguageSelect, useLanguage } from "../lib/language";
 interface Props {
   currentView: string;
   onViewChange: (view: string) => void;
@@ -33,6 +34,7 @@ export default function Navigation({
   onHome,
   onTour,
 }: Props) {
+  const { t } = useLanguage();
   const items = [
     { id: "dashboard", label: "Products", mobileLabel: "Products", icon: LayoutGrid },
     { id: "review", label: "Review", mobileLabel: "Review", icon: ClipboardCheck },
@@ -43,35 +45,36 @@ export default function Navigation({
   return (
     <aside className="studio-sidebar">
       <Brand onClick={onHome} />
-      <div className="sidebar-label">Your creative workspace</div>
+      <LanguageSelect />
+      <div className="sidebar-label">{t("Your creative workspace")}</div>
       <nav aria-label="Studio navigation">
         {items.map((item) => (
           <button
             className={`sidebar-link ${currentView === item.id ? "active" : ""}`}
             key={item.id}
-            aria-label={item.label}
+            aria-label={t(item.label)}
             onClick={() => onViewChange(item.id)}
             aria-current={currentView === item.id ? "page" : undefined}
           >
             <item.icon size={19} />
-            <span className="nav-full-label">{item.label}</span><span className="nav-mobile-label">{item.mobileLabel}</span>
+            <span className="nav-full-label">{t(item.label)}</span><span className="nav-mobile-label">{t(item.mobileLabel)}</span>
             {currentView === item.id && <i />}
           </button>
         ))}
-        <button className="sidebar-add" aria-label="Add a product" onClick={() => onViewChange("add")}>
+        <button className="sidebar-add" aria-label={t("Add a product")} onClick={() => onViewChange("add")}>
           <Plus size={19} />
-          <span className="nav-full-label">Add a product</span><span className="nav-mobile-label">Add</span>
+          <span className="nav-full-label">{t("Add a product")}</span><span className="nav-mobile-label">{t("Add")}</span>
         </button>
       </nav>
       <div className="sidebar-bottom">
-        <button className="sidebar-link" onClick={onTour}><PlayCircle size={18} /><span>Take the tour</span></button>
+        <button className="sidebar-link" onClick={onTour}><PlayCircle size={18} /><span>{t("Take the tour")}</span></button>
         <button className="sidebar-link" onClick={onToggleDark}>
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          <span>{darkMode ? "Light appearance" : "Dark appearance"}</span>
+          <span>{t(darkMode ? "Light appearance" : "Dark appearance")}</span>
         </button>
         <button className="sidebar-link" onClick={onHome}>
           <ArrowLeft size={18} />
-          <span>Back to home</span>
+          <span>{t("Back to home")}</span>
         </button>
         <div className="sidebar-profile">
           <span className="profile-avatar">
@@ -81,7 +84,7 @@ export default function Navigation({
             <strong>{user?.displayName || "Your studio"}</strong>
             <span>{user?.email || ""}</span>
           </div>
-          <button className="icon-button" aria-label="Sign out" onClick={onLogout}>
+          <button className="icon-button" aria-label={t("Sign out")} onClick={onLogout}>
             <LogOut size={16} />
           </button>
         </div>

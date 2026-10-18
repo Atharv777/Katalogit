@@ -594,30 +594,40 @@ async function cloudflareImage(args: {
     "1:1": [1024, 1024], "2:3": [768, 1152], "3:2": [1152, 768], "4:5": [896, 1120],
   };
   const [width, height] = sizes[args.aspect ?? "1:1"] ?? sizes["1:1"];
-  const form = new FormData();
-  form.append("prompt", args.prompt.slice(0, 2048));
-  form.append("width", String(width));
-  form.append("height", String(height));
-  form.append("input_image_0", new Blob([new Uint8Array(resized)], { type: "image/jpeg" }), "product.jpg");
-
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${CLOUDFLARE_IMAGE_MODEL}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: form,
-    signal: AbortSignal.timeout(120_000),
-  });
-  const payload = (await response.json().catch(() => ({}))) as {
-    success?: boolean;
-    errors?: Array<{ code?: number; message?: string }>;
-    result?: { image?: string };
+  const request = async (prompt: string) => {
+    const form = new FormData();
+    form.append("prompt", prompt.slice(0, 2048));
+    form.append("width", String(width));
+    form.append("height", String(height));
+    form.append("input_image_0", new Blob([new Uint8Array(resized)], { type: "image/jpeg" }), "product.jpg");
+    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${CLOUDFLARE_IMAGE_MODEL}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+      signal: AbortSignal.timeout(120_000),
+    });
+    const payload = (await response.json().catch(() => ({}))) as {
+      success?: boolean;
+      errors?: Array<{ code?: number; message?: string }>;
+      result?: { image?: string };
+    };
+    if (!response.ok || payload.success === false) {
+      const reason = payload.errors?.[0]?.message || `HTTP ${response.status}`;
+      throw new UpstreamError(`Cloudflare image edit unavailable: ${String(reason).slice(0, 160)}`, response.status, String(reason));
+    }
+    const image = payload.result?.image;
+    if (!image) throw new Error("Cloudflare returned no edited image.");
+    return image.replace(/^data:image\/[^;]+;base64,/, "");
   };
-  if (!response.ok || payload.success === false) {
-    const reason = payload.errors?.[0]?.message || `HTTP ${response.status}`;
-    throw new UpstreamError(`Cloudflare image edit unavailable: ${String(reason).slice(0, 160)}`, response.status, String(reason));
+
+  try {
+    return await request(args.prompt);
+  } catch (error) {
+    // Some legitimate retail shots trigger an output flag when the richer
+    // editorial prompt mentions a person. Retry once as a plain product shot.
+    if (!(error instanceof UpstreamError) || error.status !== 400 || !/flagged/i.test(error.detail)) throw error;
+    return request("Edit input image 0 into a clean e-commerce product photograph. Preserve the exact visible product, its shape, color, pattern and details. Center the item on a plain neutral studio background with soft light. Show only the product; no person, props, writing or logo added.");
   }
-  const image = payload.result?.image;
-  if (!image) throw new Error("Cloudflare returned no edited image.");
-  return image.replace(/^data:image\/[^;]+;base64,/, "");
 }
 
 /** Analyze the actual uploaded photograph before writing copy or directing edits. */
@@ -627,6 +637,7 @@ export async function analyzeProduct(args: {
   categoryLabel: string;
   notes: string;
   slotLabels: string[];
+  language?: "English" | "Hindi" | "Tamil";
 }) {
   const prompt = [
     "You are a meticulous retail product photo analyst. Inspect the attached photograph. The image is the source of truth; seller notes may supplement but must never override a visible fact.",
@@ -634,6 +645,7 @@ export async function analyzeProduct(args: {
     "Choose the closest category from apparel, footwear, electronics, bags, home, jewellery, accessories. Infer every field from the photo without asking the seller. If a detail is not visible, leave that attribute out rather than inventing it.",
     "The visual object must contain subject, colors, material, pattern, distinctiveFeatures (array), visibleText, uncertainty. State only what is actually visible. If material, hidden sides or text cannot be determined, say unknown. Never invent a logo, label, size, reverse side or component.",
     "Write concise merchant-ready listing copy. Use INR for price; if no price is supplied, make a clearly editable reasonable suggestion.",
+    `Write title, description, seoDescription, tags, and attribute values in ${args.language || "English"}. Keep category, subcategory, attribute names, and the visual object in English so product classification and image editing remain reliable.`,
     `Category guidance: ${promptSafe(args.categoryLabel, 60)}. Captured angle: ${args.slotLabels.map((s) => promptSafe(s, 40)).join(", ") || "unknown"}. If no category was selected, identify the category from the image.`,
     `Seller notes: ${promptSafe(args.notes, 1200) || "none"}.`,
   ].join("\n");
@@ -692,10 +704,11 @@ export async function analyzeProduct(args: {
   };
 }
 
-export async function generateSocialCopy(args: { title: string; description: string; category: string; platform: string; angle: string }) {
+export async function generateSocialCopy(args: { title: string; description: string; category: string; platform: string; angle: string; language?: "English" | "Hindi" | "Tamil" }) {
   const prompt = [
     "You write social media captions for a small Indian retail shop. Use only the product facts below. No invented discounts, materials, stock claims, or guarantees.",
     "Return JSON with caption (one warm, specific paragraph under 240 characters) and hashtags (array of 4-6 relevant lowercase hashtags).",
+    `Write the caption in ${args.language || "English"}. Keep hashtags in English for search.`,
     `Platform: ${promptSafe(args.platform, 30)}. Post angle: ${promptSafe(args.angle, 40)}.`,
     `Product: ${promptSafe(args.title, 120)}. Category: ${promptSafe(args.category, 60)}. Description: ${promptSafe(args.description, 500)}.`,
   ].join("\n");

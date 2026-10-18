@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { User } from "firebase/auth";
 import { Product, ProductStatus } from "../types";
 import type { ShopProfile } from "../lib/shopProfile";
+import { catalogImage } from "../lib/catalogImage";
+import { useLanguage } from "../lib/language";
 interface Props {
   products: Product[];
   onAddClick: () => void;
@@ -33,6 +35,7 @@ export default function Dashboard({
   user,
   shopProfile,
 }: Props) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
@@ -71,17 +74,17 @@ export default function Dashboard({
       <main className="studio-content">
         <div className="dashboard-heading">
           <div>
-            <p className="section-note">Your shop in {shopProfile.location}</p>
-            <h1>{shopProfile.name}'s products</h1>
-            <p>Add a photo to create a listing. You can check every detail before you save it.</p>
+            <p className="section-note">{t("Your shop in {location}", { location: shopProfile.location })}</p>
+            <h1>{t("{name}'s products", { name: shopProfile.name })}</h1>
+            <p>{t("Add a photo to create a listing. You can check every detail before you save it.")}</p>
           </div>
           <button className="button button-coral" data-tour="capture" onClick={onAddClick}>
-            <Plus size={18} /> Add a product
+            <Plus size={18} /> {t("Add a product")}
           </button>
         </div>
         {showcase && showExample && <section className="showcase-story" aria-label="Product photo example">
-          <button type="button" className="showcase-dismiss" aria-label="Remove product photo example" onClick={removeExample}><X size={15} /> Remove this example</button>
-          <div className="showcase-story-copy"><span>See it in action</span><h2>One kurti, three ways to show it.</h2><p>Here is the photo we started with, the catalogue image made with FLUX, and a social post supplied by the team.</p><button className="button button-dark" onClick={onSocialClick}>View the example post <ArrowRight size={16} /></button></div>
+          <button type="button" className="showcase-dismiss" aria-label={t("Remove this example")} onClick={removeExample}><X size={15} /> {t("Remove this example")}</button>
+          <div className="showcase-story-copy"><span>{t("See it in action")}</span><h2>{t("One kurti, three ways to show it.")}</h2><p>Here is the photo we started with, the catalogue image made with FLUX, and a social post supplied by the team.</p><button className="button button-dark" onClick={onSocialClick}>{t("View the example post")} <ArrowRight size={16} /></button></div>
           <div className="showcase-story-images"><figure><img src={showcase.images?.[0]?.sourceUrl} alt="Original photo of the embroidered kurti" /><figcaption>Photo taken</figcaption></figure><figure><img src={showcase.imageUrl} alt="FLUX catalogue image of the same kurti" /><figcaption>Catalogue result</figcaption></figure><figure><img src={showcase.aiImageLifestyle} alt="Example social post for the embroidered kurti" /><figcaption>Social post</figcaption></figure></div>
         </section>}
         <div className="dashboard-summary">
@@ -91,7 +94,7 @@ export default function Dashboard({
             </span>
             <span>
                   <strong>{savedCount.toString().padStart(2, "0")}</strong>
-              <small>Your products saved</small>
+              <small>{t("Your products saved")}</small>
             </span>
           </div>
           <div>
@@ -104,7 +107,7 @@ export default function Dashboard({
                   .toString()
                   .padStart(2, "0")}
               </strong>
-              <small>Categories</small>
+              <small>{t("Categories")}</small>
             </span>
           </div>
           <button onClick={onReviewClick}>
@@ -113,7 +116,7 @@ export default function Dashboard({
             </span>
             <span>
               <strong>{pending.toString().padStart(2, "0")}</strong>
-              <small>Need review</small>
+              <small>{t("Need review")}</small>
             </span>
             <ArrowUpRight size={19} />
           </button>
@@ -135,14 +138,14 @@ export default function Dashboard({
         )}
         <div className="catalog-toolbar" data-tour="catalog">
           <h2>
-            All products <span>{products.length}</span>
+            {t("All products")} <span>{products.length}</span>
           </h2>
           <div>
             <label className="search-field">
               <Search size={17} />
               <input
                 aria-label="Search catalog"
-                placeholder="Find something great…"
+                placeholder={t("Find something great…")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -152,7 +155,7 @@ export default function Dashboard({
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="All">All statuses</option>
+              <option value="All">{t("All statuses")}</option>
               <option value="active">Active</option>
               <option value="review">In review</option>
               <option value="draft">Draft</option>
@@ -185,7 +188,7 @@ export default function Dashboard({
               onClick={() => setCategory(c)}
               aria-pressed={category === c}
             >
-              {c === "All" ? "Everything" : c}
+              {c === "All" ? t("Everything") : c}
             </button>
           ))}
         </div>
@@ -203,13 +206,9 @@ export default function Dashboard({
                 onClick={() => onProductClick(product)}
               >
                 <div className={`catalog-art art-tone-${i % 4}`}>
-                  {product.imageUrl ? (
+                  {catalogImage(product) ? (
                     <img
-                      src={
-                        product.images?.find((shot) => shot.generatedUrl)?.generatedUrl ||
-                        product.aiImageProduct ||
-                        product.imageUrl
-                      }
+                      src={catalogImage(product)!}
                       alt={product.title}
                       loading="lazy"
                     />
@@ -227,7 +226,7 @@ export default function Dashboard({
                       ? "In review"
                       : product.status}
                   </span>
-                  {product.isDemo && <span className="catalog-demo-badge">Team example</span>}
+                  {product.isDemo && <span className="catalog-demo-badge">{t("Team example")}</span>}
                   <span className="product-open">
                     <ArrowUpRight size={20} />
                   </span>
@@ -238,9 +237,9 @@ export default function Dashboard({
                   </span>
                   <h3>{product.title}</h3>
                   <div>
-                    <strong>{product.price > 0 ? `₹${product.price.toLocaleString("en-IN")}` : "Price not set"}</strong>
+                    <strong>{product.price > 0 ? `₹${product.price.toLocaleString("en-IN")}` : t("Price not set")}</strong>
                     <span>
-                      View product <ArrowUpRight size={13} />
+                      {t("View product")} <ArrowUpRight size={13} />
                     </span>
                   </div>
                 </div>

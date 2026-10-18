@@ -4,6 +4,7 @@
  */
 
 import type { AiListing, AiStatus } from "../types";
+import type { Language } from "./language";
 
 async function readJson<T>(res: Response): Promise<T> {
   let body: { ok?: boolean; data?: T; error?: string };
@@ -28,6 +29,7 @@ export async function writeListing(input: {
   notes: string;
   slots: string[];
   image: string;
+  language?: Language;
 }): Promise<AiListing> {
   const res = await fetch("/api/ai/listing", {
     method: "POST",

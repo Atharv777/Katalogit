@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { Check, Download, Globe2, LayoutTemplate } from "lucide-react";
 import type { Product } from "../types";
+import { catalogImage } from "../lib/catalogImage";
+import { useLanguage } from "../lib/language";
 
 const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 
 function storefrontHtml(name: string, tagline: string, accent: string, products: Product[], imageOverrides: Record<string, string> = {}) {
   const safeName = escapeHtml(name || "Your shop");
   const safeTagline = escapeHtml(tagline || "Thoughtfully chosen, ready for you.");
-  const cards = products.map((product) => `<article class="item"><div class="photo"><img src="${escapeHtml(imageOverrides[product.id] || product.imageUrl)}" alt="${escapeHtml(product.title)}"></div><div class="info"><span>${escapeHtml(product.category)}</span><h2>${escapeHtml(product.title)}</h2><strong>${product.price > 0 ? `₹${product.price.toLocaleString("en-IN")}` : "Price on request"}</strong></div></article>`).join("\n");
+  const cards = products.map((product) => `<article class="item"><div class="photo"><img src="${escapeHtml(imageOverrides[product.id] || catalogImage(product) || product.imageUrl)}" alt="${escapeHtml(product.title)}"></div><div class="info"><span>${escapeHtml(product.category)}</span><h2>${escapeHtml(product.title)}</h2><strong>${product.price > 0 ? `₹${product.price.toLocaleString("en-IN")}` : "Price on request"}</strong></div></article>`).join("\n");
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${safeTagline}"><title>${safeName} · Shop</title><style>
     :root{--accent:${accent};--ink:#272831;--paper:#f9f8f5}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:23px clamp(22px,6vw,80px);border-bottom:1px solid #e9e5df;background:#fff}header strong{font-size:24px;letter-spacing:-1px}header a{color:var(--ink);font-size:13px;text-decoration:none}main{max-width:1280px;margin:auto;padding:0 clamp(22px,6vw,80px) 90px}.hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:30px;min-height:300px;padding:54px 0;border-bottom:1px solid #dedbd4}.hero p{max-width:42ch;color:#727078;line-height:1.6}.hero h1{margin:0;font-size:clamp(43px,6vw,88px);line-height:.98;letter-spacing:-.065em}.hero .shape{height:210px;border-radius:50% 50% 12% 50%;background:var(--accent);opacity:.72;transform:rotate(-12deg);justify-self:center;aspect-ratio:1}.collection-head{display:flex;justify-content:space-between;align-items:end;gap:18px;padding:45px 0 23px}.collection-head h2{font-size:29px;letter-spacing:-1px;margin:0}.collection-head span{color:#787780;font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.item{min-width:0;background:#fff;border:1px solid #ece8e2}.photo{aspect-ratio:1.08;background:#f0ede8}.photo img{width:100%;height:100%;object-fit:contain}.info{padding:20px}.info span{font-size:11px;color:#85818a}.info h2{font-size:19px;letter-spacing:-.5px;margin:8px 0 14px}.info strong{font-size:15px}footer{padding:35px clamp(22px,6vw,80px);border-top:1px solid #e9e5df;color:#8b8790;font-size:12px}@media(max-width:700px){.hero{grid-template-columns:1fr;min-height:0}.hero .shape{height:120px;justify-self:start}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.info{padding:12px}.info h2{font-size:15px}}@media(max-width:440px){.grid{grid-template-columns:1fr}}
   </style></head><body><header><strong>${safeName}</strong><a href="#collection">Shop the collection ↓</a></header><main><section class="hero"><div><h1>Good finds.<br>Made yours.</h1><p>${safeTagline}</p></div><div class="shape" aria-hidden="true"></div></section><section id="collection"><div class="collection-head"><h2>Our collection</h2><span>${products.length} products</span></div><div class="grid">${cards}</div></section></main><footer>${safeName} · Made with Katalogit AI</footer></body></html>`;
@@ -27,8 +29,9 @@ async function inlineImage(source: string): Promise<string> {
 }
 
 export default function WebsiteBuilder({ products, shopName }: { products: Product[]; shopName: string }) {
+  const { t } = useLanguage();
   const [name, setName] = useState(shopName);
-  const [tagline, setTagline] = useState("Everyday objects worth keeping close. Explore our edited collection.");
+  const [tagline, setTagline] = useState(t("Everyday objects worth keeping close. Explore our edited collection."));
   const [accent, setAccent] = useState("#ec7153");
   const [selected, setSelected] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
@@ -37,8 +40,9 @@ export default function WebsiteBuilder({ products, shopName }: { products: Produ
   const download = async () => {
     const imageOverrides: Record<string, string> = {};
     await Promise.all(chosen.map(async (product) => {
-      try { imageOverrides[product.id] = await inlineImage(product.imageUrl); }
-      catch { imageOverrides[product.id] = new URL(product.imageUrl, window.location.origin).href; }
+      const image = catalogImage(product) || product.imageUrl;
+      try { imageOverrides[product.id] = await inlineImage(image); }
+      catch { imageOverrides[product.id] = new URL(image, window.location.origin).href; }
     }));
     const html = storefrontHtml(name, tagline, accent, chosen, imageOverrides);
     const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));

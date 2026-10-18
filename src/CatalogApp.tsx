@@ -23,6 +23,10 @@ import Walkthrough from "./components/Walkthrough";
 import { AnimatePresence } from "motion/react";
 import { isPrototype } from "./lib/prototype";
 import { SHOWCASE_PRODUCTS } from "./lib/showcase";
+import { dataUrlToBlob, fileToCompressedDataUrl, generateShot } from "./lib/api";
+import { uploadImage } from "./lib/storage";
+import { CATEGORIES } from "../shared/categories";
+import { catalogImage } from "./lib/catalogImage";
 import type { ShopProfile } from "./lib/shopProfile";
 import "./studio-tools.css";
 
@@ -143,6 +147,33 @@ export default function CatalogApp({
     }
   };
 
+  const regenerateProductImage = async (product: Product) => {
+    const source = product.images?.find((shot) => shot.sourceUrl)?.sourceUrl;
+    if (!source) throw new Error("The original photo is missing. Add this product again with a photo.");
+    const image = source.startsWith("data:")
+      ? source
+      : await fileToCompressedDataUrl(await (await fetch(source)).blob());
+    const category = CATEGORIES.find((item) =>
+      `${product.category} ${product.subcategory}`.toLowerCase().includes(item.id),
+    ) ?? CATEGORIES[0];
+    const slot = category.slots[0];
+    const result = await generateShot({
+      category: category.id,
+      slot: slot.id,
+      image,
+      title: product.title,
+      material: product.attributes.Material || "",
+      colors: product.attributes.Color ? [product.attributes.Color] : [],
+    });
+    const mime = result.imageBase64.startsWith("/9j/") ? "image/jpeg" : "image/png";
+    const blob = dataUrlToBlob(`data:${mime};base64,${result.imageBase64}`);
+    const generatedUrl = await uploadImage({ uid: user.uid, productId: product.id, folder: "generated", name: slot.id, blob, contentType: blob.type });
+    const images = [{ slot: slot.id, label: slot.label, sourceUrl: source, generatedUrl, finish: "ai" as const }];
+    const patch = { imageUrl: generatedUrl, aiImageProduct: generatedUrl, images };
+    await updateProduct(user.uid, product.id, patch);
+    setSelectedProduct({ ...product, ...patch });
+  };
+
   const visibleProducts = isPrototype(user.uid)
     ? [...SHOWCASE_PRODUCTS, ...products.filter((product) => !SHOWCASE_PRODUCTS.some((example) => example.id === product.id))]
     : products;
@@ -175,9 +206,6 @@ export default function CatalogApp({
       />
 
       <div className="workspace-main flex-1 min-w-0">
-        <div className="shop-context" aria-label="Your shop details">
-          <div><strong>{shopProfile.name}</strong><p>{shopProfile.location} · {shopProfile.products} · {shopProfile.size} · {shopProfile.age}</p></div>
-        </div>
         {loading ? (
           <div className="h-screen flex flex-col items-center justify-center bg-gray-50/50 dark:bg-gray-950">
             <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
@@ -186,9 +214,9 @@ export default function CatalogApp({
             </p>
           </div>
         ) : currentView === "social" ? (
-          <SocialAgent products={visibleProducts.filter((product) => !!product.imageUrl)} />
+          <SocialAgent products={visibleProducts.filter((product) => !!catalogImage(product))} />
         ) : currentView === "website" ? (
-          <WebsiteBuilder products={visibleProducts.filter((product) => !!product.imageUrl)} shopName={shopProfile.name} />
+          <WebsiteBuilder products={visibleProducts.filter((product) => !!catalogImage(product))} shopName={shopProfile.name} />
         ) : currentView === "review" ? (
           <ReviewCenter
             products={products}
@@ -227,6 +255,7 @@ export default function CatalogApp({
             product={selectedProduct}
             onClose={() => setSelectedProduct(null)}
             onDelete={selectedProduct.isDemo ? undefined : handleDeleteProduct}
+            onRegenerate={selectedProduct.isDemo ? undefined : regenerateProductImage}
           />
         )}
       </AnimatePresence>

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Download, FileSpreadsheet, Check, ArrowUpRight } from "lucide-react";
 import { Product } from "../types";
+import { useLanguage } from "../lib/language";
 export default function ExportCatalog({ products }: { products: Product[] }) {
+  const { t } = useLanguage();
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
   const [downloaded, setDownloaded] = useState(false);
@@ -66,16 +68,16 @@ export default function ExportCatalog({ products }: { products: Product[] }) {
     <div className="studio-page">
       <header className="studio-topbar">
         <span>
-          Workspace <span>/</span> Export catalog
+          {t("Workspace")} <span>/</span> {t("Export catalog")}
         </span>
         <span className="studio-status">A file you can use elsewhere</span>
       </header>
       <main className="studio-content">
         <div className="dashboard-heading">
           <div>
-            <p className="section-note">Ready for your seller portal</p>
-            <h1>Download your product CSV.</h1>
-            <p>AI helps prepare the listing. Download the details, then upload the file to your seller portal using its import template.</p>
+            <p className="section-note">{t("Ready for your seller portal")}</p>
+            <h1>{t("Download your product CSV.")}</h1>
+            <p>{t("AI helps prepare the listing. Download the details, then upload the file to your seller portal using its import template.")}</p>
           </div>
           <span className="summary-icon lilac">
             <FileSpreadsheet size={22} />
@@ -83,8 +85,8 @@ export default function ExportCatalog({ products }: { products: Product[] }) {
         </div>
         <div className="export-layout">
           <section className="export-config">
-            <h2>Choose what to include</h2>
-            <p>Pick a category and status, or download your whole catalogue.</p>
+            <h2>{t("Choose what to include")}</h2>
+            <p>{t("Pick a category and status, or download your whole catalogue.")}</p>
             <label>
               Category
               <select
@@ -126,7 +128,7 @@ export default function ExportCatalog({ products }: { products: Product[] }) {
               onClick={download}
             >
               {downloaded ? <Check size={17} /> : <Download size={17} />}{" "}
-              {downloaded ? "Download again" : "Download CSV"}
+              {t(downloaded ? "Download again" : "Download CSV")}
             </button>
             {downloaded && (
               <p className="export-confirm" role="status">

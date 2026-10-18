@@ -92,6 +92,7 @@ aiRouter.post("/listing", async (req: Request, res: Response) => {
   const category = autoCategory ? null : getCategory(categoryId);
   const notes = typeof body.notes === "string" ? body.notes.slice(0, 2000) : "";
   const image = normaliseImage(body.image);
+  const language = body.language === "hi" ? "Hindi" : body.language === "ta" ? "Tamil" : "English";
   if (!image) return fail(res, 400, "Add a product photo before analysis.");
 
   try {
@@ -105,6 +106,7 @@ aiRouter.post("/listing", async (req: Request, res: Response) => {
             .map((id: unknown) => category.slots.find((s) => s.id === id)?.label)
             .filter(Boolean)
         : [],
+      language,
     });
     return res.json({ ok: true, data: { listing } });
   } catch (error) {
@@ -189,6 +191,7 @@ aiRouter.post("/social-copy", async (req: Request, res: Response) => {
       title: String(body.title ?? ""), description: String(body.description ?? ""),
       category: String(body.category ?? ""), platform: String(body.platform ?? "Instagram"),
       angle: String(body.angle ?? "Product spotlight"),
+      language: body.language === "hi" ? "Hindi" : body.language === "ta" ? "Tamil" : "English",
     });
     return res.json({ ok: true, data });
   } catch (error) {

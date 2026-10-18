@@ -6,6 +6,7 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Upload, Check, Loader2, AlertCircle, Image } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { LanguageSelect, useLanguage } from '../lib/language';
 
 interface MobileUploadProps {
   sessionId: string;
@@ -14,6 +15,7 @@ interface MobileUploadProps {
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 
 export default function MobileUpload({ sessionId }: MobileUploadProps) {
+  const { t } = useLanguage();
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [preview, setPreview] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -109,13 +111,14 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-6">
+      <div className="mobile-language"><LanguageSelect /></div>
       {/* Header */}
       <div className="mb-8 text-center">
         <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg shadow-indigo-900">
           K
         </div>
         <h1 className="text-2xl font-bold tracking-tight">KatalogitAI</h1>
-        <p className="text-gray-400 text-sm mt-1">Mobile Product Upload</p>
+        <p className="text-gray-400 text-sm mt-1">{t("Mobile Product Upload")}</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -128,7 +131,7 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
             className="w-full max-w-sm space-y-4"
           >
             <p className="text-center text-gray-400 text-sm mb-6">
-              Take a photo or choose one from your gallery. It'll appear in the desktop Review Center automatically.
+              {t("Take a photo or choose one from your gallery. It'll appear in the desktop Review Center automatically.")}
             </p>
 
             {/* Camera button */}
@@ -137,7 +140,7 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
               className="w-full flex items-center justify-center gap-3 py-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-indigo-900"
             >
               <Camera size={24} />
-              Take Photo
+              {t("Take Photo")}
             </button>
             <input
               ref={cameraInputRef}
@@ -154,7 +157,7 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
               className="w-full flex items-center justify-center gap-3 py-5 bg-gray-800 hover:bg-gray-700 active:scale-95 rounded-2xl font-bold text-lg transition-all border border-gray-700"
             >
               <Image size={24} />
-              Choose from Gallery
+              {t("Choose from Gallery")}
             </button>
             <input
               ref={fileInputRef}
@@ -187,7 +190,7 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
             )}
             <div className="flex items-center gap-3 text-gray-300">
               <Loader2 size={24} className="animate-spin text-indigo-400" />
-              <span className="font-medium">Sending to catalog...</span>
+              <span className="font-medium">{t("Sending to catalog...")}</span>
             </div>
           </motion.div>
         )}
@@ -214,16 +217,16 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
               <Check size={32} />
             </motion.div>
             <div>
-              <h2 className="text-xl font-bold">Photo Sent!</h2>
+              <h2 className="text-xl font-bold">{t("Photo Sent!")}</h2>
               <p className="text-gray-400 text-sm mt-1">
-                AI is analyzing it now. Check the Review Center on your desktop.
+                {t("AI is analyzing it now. Check the Review Center on your desktop.")}
               </p>
             </div>
             <button
               onClick={reset}
               className="w-full py-4 bg-gray-800 hover:bg-gray-700 rounded-2xl font-bold transition-all border border-gray-700"
             >
-              Upload Another
+              {t("Upload Another")}
             </button>
           </motion.div>
         )}
@@ -240,14 +243,14 @@ export default function MobileUpload({ sessionId }: MobileUploadProps) {
               <AlertCircle size={32} className="text-red-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-red-400">Upload Failed</h2>
+              <h2 className="text-xl font-bold text-red-400">{t("Upload Failed")}</h2>
               <p className="text-gray-400 text-sm mt-2">{errorMsg}</p>
             </div>
             <button
               onClick={reset}
               className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition-all"
             >
-              Try Again
+              {t("Try Again")}
             </button>
           </motion.div>
         )}

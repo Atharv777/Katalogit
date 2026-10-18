@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Loader2, Smartphone } from "lucide-react";
 import QRCode from "qrcode";
+import { useLanguage } from "../lib/language";
 
 const localHost = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
 
 export default function PhoneCapture({ onImageReceived }: { onImageReceived: (image: string) => void }) {
+  const { language } = useLanguage();
   const [origin, setOrigin] = useState(localHost ? "" : window.location.origin);
   const [sessionId, setSessionId] = useState("");
   const [qr, setQr] = useState("");
@@ -53,7 +55,7 @@ export default function PhoneCapture({ onImageReceived }: { onImageReceived: (im
 
   const cleanOrigin = origin.trim().replace(/\/$/, "");
   const phoneUrl = sessionId && cleanOrigin
-    ? `${/^https?:\/\//i.test(cleanOrigin) ? cleanOrigin : `http://${cleanOrigin}`}/mobile-upload?session=${encodeURIComponent(sessionId)}`
+    ? `${/^https?:\/\//i.test(cleanOrigin) ? cleanOrigin : `http://${cleanOrigin}`}/mobile-upload?session=${encodeURIComponent(sessionId)}&lang=${language}`
     : "";
 
   useEffect(() => {

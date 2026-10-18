@@ -89,6 +89,8 @@
 .classic-original img { width: 100%; height: 100%; object-fit: cover; }
 .classic-original span { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,.7); border-radius: 5px; padding: 4px 6px; font: 700 .58rem ui-monospace, monospace; letter-spacing: .1em; }
 .classic-ai-label { display: flex; align-items: center; gap: 6px; color: #818cf8; border-top: 1px solid #374151; margin-top: 18px; padding-top: 16px; }
+.classic-review-gallery > .classic-ai-label:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+.classic-source-label { border-top: 1px solid #374151; margin-top: 18px; padding-top: 16px; }
 .classic-ai-label i { width: 6px; height: 6px; border-radius: 50%; background: #818cf8; }
 .classic-previews { display: grid; grid-template-columns: 1fr; gap: 14px; }
 .classic-previews > div { min-width: 0; }

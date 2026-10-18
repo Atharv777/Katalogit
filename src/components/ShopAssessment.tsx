@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Package, Sparkles } from "lucide-react";
 import type { ShopProfile } from "../lib/shopProfile";
 import Brand from "./Brand";
+import { LanguageSelect, useLanguage } from "../lib/language";
 
 const categories = [
   { label: "Women's Clothing", icon: "👗" }, { label: "Men's Clothing", icon: "👔" },
@@ -50,6 +51,7 @@ function StepVisual({ step, profile, products, goals: selectedGoals }: { step: n
 }
 
 export default function ShopAssessment({ onBack, onComplete }: { onBack: () => void; onComplete: (profile: ShopProfile) => void }) {
+  const { t } = useLanguage();
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<ShopProfile>({ name: "", location: "", products: "", size: "", age: "", goal: "" });
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -69,24 +71,24 @@ export default function ShopAssessment({ onBack, onComplete }: { onBack: () => v
 
   return <div className="ob-overlay-new seller-assessment">
     <div className="ob-progress-bar-new"><div className="ob-progress-fill-new" style={{ width: `${(step + 1) * 20}%` }} /></div>
-    <header className="seller-assessment-header"><Brand onClick={onBack} /><span>About your shop</span></header>
+    <header className="seller-assessment-header"><Brand onClick={onBack} /><span>{t("About your shop")}</span><LanguageSelect /></header>
     <main className="ob-main-container-new">
       <div className="ob-content-left-new">
         <AnimatePresence mode="wait">
           <motion.section key={step} className="ob-step-new" initial={reduced ? false : { opacity: 0, x: -22 }} animate={{ opacity: 1, x: 0 }} exit={reduced ? undefined : { opacity: 0, x: 18 }} transition={{ duration: .28, ease: [.22, 1, .36, 1] }}>
-            <span className="ob-step-label-new">Step {step + 1} of 5</span>
-            <h1 className="ob-title-new">{titles[step]}</h1>
-            {step === 0 && <><p className="ob-subtitle-new">Your shop name appears on the storefront as you type.</p><label className="ob-form-group-new"><span className="ob-label-new">Store name</span><input className="ob-input-new" value={profile.name} maxLength={60} onChange={(event) => update("name", event.target.value)} placeholder="Your store name" /></label><label className="ob-form-group-new"><span className="ob-label-new">City or neighbourhood</span><input className="ob-input-new" value={profile.location} maxLength={80} onChange={(event) => update("location", event.target.value)} placeholder="Where is your shop?" /></label></>}
-            {step === 1 && <><p className="ob-subtitle-new">Choose the products you want to show. Pick more than one if you like.</p><div className="ob-chips-grid-new">{categories.map((item) => <button type="button" key={item.label} className={`ob-chip-new ob-chip-lg ${selectedProducts.includes(item.label) ? "active" : ""}`} aria-pressed={selectedProducts.includes(item.label)} onClick={() => setSelectedProducts((current) => toggle(current, item.label))}><span>{item.icon}</span>{item.label}</button>)}</div><label className="ob-form-group-new"><span className="ob-label-new">Something else?</span><input className="ob-input-new" value={otherProduct} maxLength={80} onChange={(event) => setOtherProduct(event.target.value)} placeholder="Tell us what you sell" /></label></>}
-            {step === 2 && <><p className="ob-subtitle-new">About how many products do you have today?</p><div className="ob-scale-grid-new">{scales.map((item) => <button type="button" key={item.label} className={`ob-scale-card-new ${profile.size === item.label ? "active" : ""}`} aria-pressed={profile.size === item.label} onClick={() => update("size", item.label)}><span>{item.icon}</span><div><div className="ob-scale-title">{item.label}</div><div className="ob-scale-sub">{item.detail}</div></div></button>)}</div></>}
-            {step === 3 && <><p className="ob-subtitle-new">There is no minimum experience needed.</p><div className="ob-scale-grid-new">{ages.map((item, index) => <button type="button" key={item} className={`ob-scale-card-new ${profile.age === item ? "active" : ""}`} aria-pressed={profile.age === item} onClick={() => update("age", item)}><span>{["🌱", "🪴", "🌿", "🌳"][index]}</span><div className="ob-scale-title">{item}</div></button>)}</div></>}
-            {step === 4 && <><p className="ob-subtitle-new">Tell us what matters most. We’ll show those details in your studio.</p><div className="ob-goals-grid">{goals.map((item) => <button type="button" key={item} className={`ob-option-new ${selectedGoals.includes(item) ? "active" : ""}`} aria-pressed={selectedGoals.includes(item)} onClick={() => setSelectedGoals((current) => toggle(current, item))}>{item}</button>)}</div><label className="ob-form-group-new"><span className="ob-label-new">Anything else? <small>(optional)</small></span><textarea className="ob-input-new" rows={3} value={goalNote} maxLength={180} onChange={(event) => setGoalNote(event.target.value)} placeholder="e.g. I want more people nearby to find my shop" /></label></>}
-            <div className="ob-buttons-row-new"><button type="button" className="ob-btn-secondary-new" onClick={back}><ArrowLeft size={17} /> Back</button><button type="button" className="ob-btn-primary-new" disabled={!canContinue} onClick={next}>{step === 4 ? "Enter my studio" : "Next"}<ArrowRight size={17} /></button></div>
+            <span className="ob-step-label-new">{t("Step {step} of 5", { step: step + 1 })}</span>
+            <h1 className="ob-title-new">{t(titles[step])}</h1>
+            {step === 0 && <><p className="ob-subtitle-new">{t("Your shop name appears on the storefront as you type.")}</p><label className="ob-form-group-new"><span className="ob-label-new">{t("Store name")}</span><input className="ob-input-new" value={profile.name} maxLength={60} onChange={(event) => update("name", event.target.value)} placeholder={t("Your store name")} /></label><label className="ob-form-group-new"><span className="ob-label-new">{t("City or neighbourhood")}</span><input className="ob-input-new" value={profile.location} maxLength={80} onChange={(event) => update("location", event.target.value)} placeholder={t("Where is your shop?")} /></label></>}
+            {step === 1 && <><p className="ob-subtitle-new">{t("Choose the products you want to show. Pick more than one if you like.")}</p><div className="ob-chips-grid-new">{categories.map((item) => <button type="button" key={item.label} className={`ob-chip-new ob-chip-lg ${selectedProducts.includes(item.label) ? "active" : ""}`} aria-pressed={selectedProducts.includes(item.label)} onClick={() => setSelectedProducts((current) => toggle(current, item.label))}><span>{item.icon}</span>{t(item.label)}</button>)}</div><label className="ob-form-group-new"><span className="ob-label-new">{t("Something else?")}</span><input className="ob-input-new" value={otherProduct} maxLength={80} onChange={(event) => setOtherProduct(event.target.value)} placeholder={t("Tell us what you sell")} /></label></>}
+            {step === 2 && <><p className="ob-subtitle-new">{t("About how many products do you have today?")}</p><div className="ob-scale-grid-new">{scales.map((item) => <button type="button" key={item.label} className={`ob-scale-card-new ${profile.size === item.label ? "active" : ""}`} aria-pressed={profile.size === item.label} onClick={() => update("size", item.label)}><span>{item.icon}</span><div><div className="ob-scale-title">{t(item.label)}</div><div className="ob-scale-sub">{item.detail}</div></div></button>)}</div></>}
+            {step === 3 && <><p className="ob-subtitle-new">{t("There is no minimum experience needed.")}</p><div className="ob-scale-grid-new">{ages.map((item, index) => <button type="button" key={item} className={`ob-scale-card-new ${profile.age === item ? "active" : ""}`} aria-pressed={profile.age === item} onClick={() => update("age", item)}><span>{["🌱", "🪴", "🌿", "🌳"][index]}</span><div className="ob-scale-title">{t(item)}</div></button>)}</div></>}
+            {step === 4 && <><p className="ob-subtitle-new">{t("Tell us what matters most. We’ll show those details in your studio.")}</p><div className="ob-goals-grid">{goals.map((item) => <button type="button" key={item} className={`ob-option-new ${selectedGoals.includes(item) ? "active" : ""}`} aria-pressed={selectedGoals.includes(item)} onClick={() => setSelectedGoals((current) => toggle(current, item))}>{t(item)}</button>)}</div><label className="ob-form-group-new"><span className="ob-label-new">{t("Anything else?")} <small>{t("(optional)")}</small></span><textarea className="ob-input-new" rows={3} value={goalNote} maxLength={180} onChange={(event) => setGoalNote(event.target.value)} placeholder="e.g. I want more people nearby to find my shop" /></label></>}
+            <div className="ob-buttons-row-new"><button type="button" className="ob-btn-secondary-new" onClick={back}><ArrowLeft size={17} /> {t("Back")}</button><button type="button" className="ob-btn-primary-new" disabled={!canContinue} onClick={next}>{step === 4 ? t("Enter my studio") : t("Next")}<ArrowRight size={17} /></button></div>
           </motion.section>
         </AnimatePresence>
       </div>
       <div className="ob-graphics-right-new"><StepVisual step={step} profile={profile} products={selectedProducts} goals={selectedGoals} /></div>
     </main>
-    <footer className="ob-step-dots-container">{titles.map((title, index) => <span key={title} className={`ob-step-dot ${index === step ? "active" : index < step ? "completed" : ""}`} aria-label={`Step ${index + 1}: ${title}`} />)}<small>No account or password needed</small></footer>
+    <footer className="ob-step-dots-container">{titles.map((title, index) => <span key={title} className={`ob-step-dot ${index === step ? "active" : index < step ? "completed" : ""}`} aria-label={t("Step {step} of 5", { step: index + 1 })} />)}<small>{t("No account or password needed")}</small></footer>
   </div>;
 }

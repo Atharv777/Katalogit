@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Check, X, Eye, CheckCheck, Sparkles } from "lucide-react";
 import { Product, ProductStatus } from "../types";
+import { catalogImage } from "../lib/catalogImage";
+import { useLanguage } from "../lib/language";
 interface Props {
   products: Product[];
   onApprove: (id: string) => void | Promise<void>;
@@ -13,6 +15,7 @@ export default function ReviewCenter({
   onReject,
   onView,
 }: Props) {
+  const { t } = useLanguage();
   const pending = products.filter((p) => p.status === ProductStatus.REVIEW);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -31,7 +34,7 @@ export default function ReviewCenter({
     <div className="studio-page">
       <header className="studio-topbar">
         <span>
-          Workspace <span>/</span> Review queue
+          {t("Workspace")} <span>/</span> {t("Review queue")}
         </span>
         <span className="studio-status">
           <span className="status-dot" />
@@ -41,8 +44,8 @@ export default function ReviewCenter({
       <main className="studio-content">
         <div className="dashboard-heading">
           <div>
-            <p className="section-note">AI suggests. You decide.</p>
-            <h1>Your eye for the final detail.</h1>
+            <p className="section-note">{t("AI suggests. You decide.")}</p>
+            <h1>{t("Your eye for the final detail.")}</h1>
             <p>
               Check each listing, make it yours, and welcome it to the catalog.
             </p>
@@ -71,7 +74,7 @@ export default function ReviewCenter({
                 onClick={() => onView(p)}
                 aria-label={`View ${p.title}`}
               >
-                {p.aiImageProduct || p.imageUrl ? <img src={p.aiImageProduct || p.imageUrl} alt={p.title} /> : <span className="review-image-empty">No photo yet</span>}
+                {catalogImage(p) ? <img src={catalogImage(p)!} alt={p.title} /> : <span className="review-image-empty">AI image not ready — open to retry</span>}
               </button>
               <div className="review-row-copy">
                 <span className="product-category">
@@ -90,20 +93,20 @@ export default function ReviewCenter({
                   disabled={busy !== null}
                 >
                   <Check size={16} />
-                  {busy === p.id ? "Saving…" : "Approve"}
+                  {t(busy === p.id ? "Saving…" : "Approve")}
                 </button>
                 <button
                   className="button button-outline"
                   onClick={() => onView(p)}
                 >
-                  <Eye size={16} /> View details
+                  <Eye size={16} /> {t("View details")}
                 </button>
                 <button
                   className="review-reject"
                   onClick={() => act(p.id, onReject)}
                   disabled={busy !== null}
                 >
-                  <X size={13} /> Remove from queue
+                  <X size={13} /> {t("Remove from queue")}
                 </button>
               </div>
             </article>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, Download, Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
 import type { Product } from "../types";
+import { catalogImage } from "../lib/catalogImage";
+import { useLanguage } from "../lib/language";
 
 async function imageAsDataUrl(url: string): Promise<string> {
   if (url.startsWith("data:")) return url;
@@ -39,6 +41,7 @@ const lineWrap = (ctx: CanvasRenderingContext2D, value: string, maxWidth: number
 };
 
 export default function SocialAgent({ products }: { products: Product[] }) {
+  const { language, t } = useLanguage();
   const [productId, setProductId] = useState(products[0]?.id ?? "");
   const [platform, setPlatform] = useState("Instagram");
   const [angle, setAngle] = useState("Product spotlight");
@@ -62,10 +65,10 @@ export default function SocialAgent({ products }: { products: Product[] }) {
   const generate = async () => {
     if (!product) return;
     setBusy(true); setFeedback("");
-    const imageUrl = product.images?.find((item) => item.generatedUrl)?.generatedUrl || product.imageUrl;
+    const imageUrl = catalogImage(product) || product.imageUrl;
     const copyRequest = fetch("/api/ai/social-copy", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: product.title, description: product.description, category: product.category, platform, angle }),
+      body: JSON.stringify({ title: product.title, description: product.description, category: product.category, platform, angle, language }),
     }).then(async (response) => {
       const payload = await response.json();
       if (!response.ok || !payload.ok) throw new Error(payload.error || "Caption unavailable");
@@ -111,7 +114,7 @@ export default function SocialAgent({ products }: { products: Product[] }) {
       ctx.fillStyle = "#f5f1ea"; ctx.fillRect(0, 0, 1080, 1350);
       ctx.fillStyle = "#282931"; ctx.font = "700 38px Arial"; ctx.fillText("katalogit", 72, 94);
       ctx.fillStyle = "#ec7153"; ctx.fillRect(72, 125, 936, 7);
-      const src = campaignImage || product.imageUrl;
+      const src = campaignImage || catalogImage(product) || product.imageUrl;
       const image = await loadImage(src);
       const scale = Math.min(910 / image.width, 850 / image.height);
       const width = image.width * scale, height = image.height * scale;
@@ -128,8 +131,8 @@ export default function SocialAgent({ products }: { products: Product[] }) {
     }
   };
 
-  return <div className="studio-page"><header className="studio-topbar"><span>Workspace <span>/</span> Make a post</span><span className="studio-status">Create a post from a product</span></header><main className="studio-content tool-page">
-    <div className="tool-heading" data-tour="social"><div><p className="section-note">Share your products</p><h1>Make a social post</h1><p>Choose a product to make a post image and caption.</p></div><Sparkles size={32} /></div>
+  return <div className="studio-page"><header className="studio-topbar"><span>{t("Workspace")} <span>/</span> {t("Make a post")}</span><span className="studio-status">{t("Create a post from a product")}</span></header><main className="studio-content tool-page">
+    <div className="tool-heading" data-tour="social"><div><p className="section-note">{t("Share your products")}</p><h1>{t("Make a social post")}</h1><p>{t("Choose a product to make a post image and caption.")}</p></div><Sparkles size={32} /></div>
     {product?.isDemo && product.aiImageLifestyle && <div className="social-example-note"><strong>Team example</strong><span>The post shown below was provided by the team for this kurti. Choose Generate post to try a new FLUX image.</span></div>}
     {product ? <div className="tool-layout"><section className="tool-controls"><h2>Make a post</h2><label>Product<select value={product.id} onChange={(event) => setProductId(event.target.value)}>{products.map((item) => <option key={item.id} value={item.id}>{item.title}{item.isDemo ? " · team example" : ""}</option>)}</select></label><label>Platform<select value={platform} onChange={(event) => setPlatform(event.target.value)}><option>Instagram</option><option>Facebook</option><option>Pinterest</option></select></label><label>Post angle<select value={angle} onChange={(event) => setAngle(event.target.value)}><option>Product spotlight</option><option>New arrival</option><option>Everyday inspiration</option></select></label><button className="button button-coral tool-primary" disabled={busy} onClick={() => void generate()}>{busy ? <Loader2 className="spin" size={17} /> : <Sparkles size={17} />}{busy ? "Creating post…" : "Generate post"}</button><p className="tool-hint">Generate post uses FLUX to edit this product photo. You can also download the team example shown here.</p></section>
     <section className="tool-output"><div className="social-preview"><div className="social-preview-head"><strong>katalogit</strong><span>{angle}</span></div><div className={`social-preview-art ${imageFinish === "example" ? "social-preview-example" : ""}`}><img src={campaignImage || product.imageUrl} alt={`${product.title} social post`} /><span>{imageFinish === "ai" ? "New AI image" : imageFinish === "example" ? "Team example post" : "Catalogue photo"}</span></div><div className="social-preview-bottom"><span>{product.category}</span><h2>{product.title}</h2><strong>{product.price > 0 ? `₹${product.price.toLocaleString("en-IN")}` : "Price not set"}</strong></div></div><div className="social-caption"><div><strong>Caption</strong><span>{platform}</span></div><p>{caption}</p><small>{hashtags.join(" ")}</small><div className="social-actions"><button className="button button-dark" onClick={() => void download()}><Download size={16} /> Download post image</button><button className="button button-light" onClick={() => { void navigator.clipboard.writeText(`${caption}\n\n${hashtags.join(" ")}`).then(() => setFeedback("Caption copied.")); }}><Copy size={16} /> Copy caption</button></div>{feedback && <p className="tool-feedback" role="status"><Check size={15} /> {feedback}</p>}</div></section></div> : <div className="tool-empty"><ImageIcon size={28} /><h2>Add a product photo first</h2><p>Once you save a product with a photo, you can make a post from it here.</p></div>}
